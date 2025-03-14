@@ -7,7 +7,7 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata = {
   title: "Dashboard Énergie Solaire",
   description: "Moniteur d'énergie solaire en temps réel",
-    generator: 'v0.dev'
+  image: "https://feegaffe.fr/logo.png",
 }
 
 export default function RootLayout({
