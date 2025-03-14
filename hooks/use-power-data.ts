@@ -14,6 +14,7 @@ export function usePowerData() {
   useEffect(() => {
     const fetchHistory = async () => {
       try {
+        setIsLoading(true)
         const response = await fetch(API_HISTORY)
         if (!response.ok) throw new Error("Erreur de récupération de l'historique")
 
