@@ -1,28 +1,30 @@
-import { NextResponse } from "next/server"
-
-// Mock data for demonstration
-const mockHistoryData = Array.from({ length: 24 }).map((_, i) => {
-  const hour = i.toString().padStart(2, "0")
-  return {
-    time: `${hour}:00`,
-    power: 100 + Math.random() * 150,
-    voltage: 12 + Math.random() * 2,
-    current: 2 + Math.random() * 3,
-  }
-})
+import { NextResponse } from "next/server";
 
 export async function GET() {
-  // In a real app, this would connect to your Arduino or database
-  const data = {
-    voltage: 12.6,
-    current: 3.2,
-    power: 40.32,
-    batteryLevel: 78,
-    totalEnergy: 1250,
-    solarPower: 120,
-    history: mockHistoryData,
+  try {
+    const response = await fetch("https://feegaffe.fr/solar/solar.php");
+
+    if (!response.ok) {
+      throw new Error(`Erreur API: ${response.statusText}`);
+    }
+
+    const apiData = await response.json();
+
+    // Adapter les données retournées
+    const data = {
+      id: apiData.id,
+      voltage: parseFloat(apiData.voltage),
+      current: parseFloat(apiData.current),
+      power: parseFloat(apiData.power),
+      batteryLevel: parseInt(apiData.battery_level, 10),
+      totalEnergy: parseFloat(apiData.total_energy),
+      solarPower: parseFloat(apiData.solar_power),
+      timestamp: apiData.timestamp
+    };
+
+    return NextResponse.json(data);
+  } catch (error) {
+    console.error("Erreur lors de la récupération des données :", error);
+    return NextResponse.json({ error: "Impossible de récupérer les données" }, { status: 500 });
   }
-
-  return NextResponse.json(data)
 }
-
