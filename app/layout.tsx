@@ -8,6 +8,7 @@ export const metadata = {
   title: "Dashboard Énergie Solaire",
   description: "Moniteur d'énergie solaire en temps réel",
   image: "https://feegaffe.fr/logo.png",
+    generator: 'v0.dev'
 }
 
 export default function RootLayout({
@@ -21,6 +22,8 @@ export default function RootLayout({
     </html>
   )
 }
+
+import "./globals.css"
 
 
 

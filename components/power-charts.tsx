@@ -15,30 +15,55 @@ interface PowerChartsProps {
 export function PowerCharts({ data }: PowerChartsProps) {
   const [activeTab, setActiveTab] = useState("power")
 
-  // In a real app, this would come from the API with historical data
-  const chartData = data.history.map((item) => ({
-    time: item.time,
-    power: item.power,
-    voltage: item.voltage,
-    current: item.current,
-  }))
+  // Utiliser les données d'historique de l'API
+  const chartData = data.history
 
-  // Define colors for each metric
+  // Définir les couleurs pour chaque métrique
   const colors = {
-    power: "#10b981", // green
-    voltage: "#3b82f6", // blue
-    current: "#eab308", // yellow
+    power: "#10b981", // vert
+    voltage: "#3b82f6", // bleu
+    current: "#f59e0b", // jaune
+  }
+
+  // Calculer les valeurs min et max pour l'axe Y
+  const getYDomain = () => {
+    if (activeTab === "power") {
+      const values = chartData.map((item) => item.power)
+      const max = Math.max(...values, 60) // Au moins 60W pour la puissance
+      return [0, Math.ceil(max / 15) * 15] // Arrondir au multiple de 15 supérieur
+    } else if (activeTab === "voltage") {
+      const values = chartData.map((item) => item.voltage)
+      const max = Math.max(...values, 250) // Au moins 250V pour la tension
+      return [0, Math.ceil(max / 50) * 50] // Arrondir au multiple de 50 supérieur
+    } else {
+      const values = chartData.map((item) => item.current)
+      const max = Math.max(...values, 15) // Au moins 15A pour le courant
+      return [0, Math.ceil(max / 5) * 5] // Arrondir au multiple de 5 supérieur
+    }
+  }
+
+  // Générer les ticks pour l'axe Y
+  const getYTicks = () => {
+    const [min, max] = getYDomain()
+    const step = (max - min) / 4 // 4 intervalles pour 5 ticks
+    return [min, min + step, min + 2 * step, min + 3 * step, max]
   }
 
   return (
-    <Card>
+    <Card className="bg-[#0f172a] text-white border-none">
       <CardHeader>
         <CardTitle>Historique de Puissance</CardTitle>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-2">
-          <TabsList>
-            <TabsTrigger value="power">Puissance</TabsTrigger>
-            <TabsTrigger value="voltage">Tension</TabsTrigger>
-            <TabsTrigger value="current">Courant</TabsTrigger>
+          <TabsList className="bg-[#1e293b]">
+            <TabsTrigger value="power" className="data-[state=active]:bg-[#334155] data-[state=active]:text-white">
+              Puissance
+            </TabsTrigger>
+            <TabsTrigger value="voltage" className="data-[state=active]:bg-[#334155] data-[state=active]:text-white">
+              Tension
+            </TabsTrigger>
+            <TabsTrigger value="current" className="data-[state=active]:bg-[#334155] data-[state=active]:text-white">
+              Courant
+            </TabsTrigger>
           </TabsList>
         </Tabs>
       </CardHeader>
@@ -48,42 +73,39 @@ export function PowerCharts({ data }: PowerChartsProps) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3 }}
-          className="h-[300px] w-full"
+          className="h-[400px] w-full"
         >
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-              <defs>
-                <linearGradient id="colorPower" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={colors.power} stopOpacity={0.8} />
-                  <stop offset="95%" stopColor={colors.power} stopOpacity={0} />
-                </linearGradient>
-                <linearGradient id="colorVoltage" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={colors.voltage} stopOpacity={0.8} />
-                  <stop offset="95%" stopColor={colors.voltage} stopOpacity={0} />
-                </linearGradient>
-                <linearGradient id="colorCurrent" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={colors.current} stopOpacity={0.8} />
-                  <stop offset="95%" stopColor={colors.current} stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <XAxis dataKey="time" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
+            <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 20 }}>
+              <XAxis
+                dataKey="time"
+                stroke="#888888"
+                fontSize={12}
+                tickLine={false}
+                axisLine={false}
+                tick={{ fill: "#888888" }}
+              />
               <YAxis
                 stroke="#888888"
                 fontSize={12}
                 tickLine={false}
                 axisLine={false}
+                domain={getYDomain()}
+                ticks={getYTicks()}
+                tick={{ fill: "#888888" }}
                 tickFormatter={(value) => {
                   const unit = activeTab === "power" ? "W" : activeTab === "voltage" ? "V" : "A"
                   return `${value}${unit}`
                 }}
               />
-              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: "hsl(var(--card))",
-                  borderColor: "hsl(var(--border))",
+                  backgroundColor: "#1e293b",
+                  borderColor: "#475569",
                   borderRadius: "0.5rem",
                   fontSize: "0.875rem",
+                  color: "white",
                 }}
                 formatter={(value, name) => {
                   const unit = name === "power" ? "W" : name === "voltage" ? "V" : "A"
@@ -103,8 +125,9 @@ export function PowerCharts({ data }: PowerChartsProps) {
                   type="monotone"
                   dataKey="power"
                   stroke={colors.power}
-                  fillOpacity={1}
-                  fill="url(#colorPower)"
+                  strokeWidth={2}
+                  fill={colors.power}
+                  fillOpacity={0.5}
                   isAnimationActive={true}
                 />
               )}
@@ -113,8 +136,9 @@ export function PowerCharts({ data }: PowerChartsProps) {
                   type="monotone"
                   dataKey="voltage"
                   stroke={colors.voltage}
-                  fillOpacity={1}
-                  fill="url(#colorVoltage)"
+                  strokeWidth={2}
+                  fill={colors.voltage}
+                  fillOpacity={0.5}
                   isAnimationActive={true}
                 />
               )}
@@ -123,8 +147,9 @@ export function PowerCharts({ data }: PowerChartsProps) {
                   type="monotone"
                   dataKey="current"
                   stroke={colors.current}
-                  fillOpacity={1}
-                  fill="url(#colorCurrent)"
+                  strokeWidth={2}
+                  fill={colors.current}
+                  fillOpacity={0.5}
                   isAnimationActive={true}
                 />
               )}
