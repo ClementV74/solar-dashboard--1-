@@ -4,7 +4,7 @@
 
 Un tableau de bord moderne et interactif pour surveiller votre système d'énergie solaire en temps réel. Visualisez la production d'énergie, l'état de la batterie, et suivez les tendances de consommation avec des graphiques dynamiques et des métriques claires.
 
-![Dashboard Preview](https://placeholder.svg?height=300&width=600)
+![Dashboard Preview](https://feegaffe.fr/solar/dashboard.png)
 
 ## ✨ Fonctionnalités
 
